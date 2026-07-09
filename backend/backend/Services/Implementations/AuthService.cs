@@ -1,6 +1,5 @@
 ﻿using backend.Data;
 using backend.DTOs.Auth;
-using backend.Entities;
 using backend.Exceptions;
 using backend.Services.Interfaces;
 using FluentValidation;
@@ -13,7 +12,7 @@ namespace backend.Services.Implementations
         IValidator<RegisterRequest> registerValidator,
         IValidator<LoginRequest> loginValidator) : IAuthService
     {
-        public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
+        public async Task<AuthResult> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
         {
             await registerValidator.ValidateAndThrowAsync(request, ct);
 
@@ -32,42 +31,43 @@ namespace backend.Services.Implementations
             context.Users.Add(user);
             await context.SaveChangesAsync(ct);
 
-            return await BuildAuthResponseAsync(user, ct);
+            return await BuildAuthResultAsync(user, ct);
         }
 
-        public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default)
+        public async Task<AuthResult> LoginAsync(LoginRequest request, CancellationToken ct = default)
         {
             await loginValidator.ValidateAndThrowAsync(request, ct);
 
             var email = request.Email.Trim().ToLowerInvariant();
             var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
 
-            // same message for both cases — don't reveal which emails exist
             if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
                 throw new UnauthorizedException("Invalid email or password.");
 
-            return await BuildAuthResponseAsync(user, ct);
+            return await BuildAuthResultAsync(user, ct);
         }
 
-        public async Task<AuthResponse> RefreshAsync(RefreshTokenRequest request, CancellationToken ct = default)
+        public async Task<AuthResult> RefreshAsync(string refreshToken, CancellationToken ct = default)
         {
+            if (string.IsNullOrWhiteSpace(refreshToken))
+                throw new UnauthorizedException("Refresh token is missing.");
+
             var existing = await context.RefreshTokens
                 .Include(rt => rt.User)
-                .FirstOrDefaultAsync(rt => rt.Token == request.RefreshToken, ct);
+                .FirstOrDefaultAsync(rt => rt.Token == refreshToken, ct);
 
             if (existing is null || !existing.IsActive)
                 throw new UnauthorizedException("Invalid or expired refresh token.");
 
-            // revoke the old token, issue a brand new one
+            // revoke the old token, issue a brand new one (rotation)
             existing.IsRevoked = true;
 
-            return await BuildAuthResponseAsync(existing.User, ct);
+            return await BuildAuthResultAsync(existing.User, ct);
         }
 
-        // shared: create tokens, persist refresh token, map to response
-        private async Task<AuthResponse> BuildAuthResponseAsync(User user, CancellationToken ct)
+        // shared: clean stale tokens, create new tokens, persist, return access + refresh
+        private async Task<AuthResult> BuildAuthResultAsync(User user, CancellationToken ct)
         {
-            // remove this user's revoked/expired refresh tokens
             var staleTokens = await context.RefreshTokens
                 .Where(rt => rt.UserId == user.Id &&
                              (rt.IsRevoked || rt.ExpiresAt < DateTime.UtcNow))
@@ -82,12 +82,15 @@ namespace backend.Services.Implementations
             context.RefreshTokens.Add(refreshToken);
             await context.SaveChangesAsync(ct);
 
-            return new AuthResponse
+            return new AuthResult
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken.Token,
-                Email = user.Email,
-                Role = user.Role.ToString()
+                Response = new AuthResponse
+                {
+                    AccessToken = accessToken,
+                    Email = user.Email,
+                    Role = user.Role.ToString()
+                },
+                RefreshToken = refreshToken.Token
             };
         }
     }

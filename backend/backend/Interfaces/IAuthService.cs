@@ -4,8 +4,8 @@ namespace backend.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default);
-        Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken ct = default);
-        Task<AuthResponse> RefreshAsync(RefreshTokenRequest request, CancellationToken ct = default);
+        Task<AuthResult> RegisterAsync(RegisterRequest request, CancellationToken ct = default);
+        Task<AuthResult> LoginAsync(LoginRequest request, CancellationToken ct = default);
+        Task<AuthResult> RefreshAsync(string refreshToken, CancellationToken ct = default);
     }
 }
