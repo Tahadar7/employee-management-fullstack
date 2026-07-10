@@ -1,0 +1,43 @@
+<div class="register-container">
+  <form class="register-form" [formGroup]="form" (ngSubmit)="onRegister()">
+    <h2>Register</h2>
+
+    @if (errorMessage()) {
+      <div class="error-banner">{{ errorMessage() }}</div>
+    }
+
+    <div class="input-group">
+      <label for="email">Email</label>
+      <input
+        type="email"
+        id="email"
+        formControlName="email"
+        placeholder="Enter your email"
+      />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <small class="field-error">A valid email is required.</small>
+      }
+    </div>
+
+    <div class="input-group">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        formControlName="password"
+        placeholder="Enter your password"
+      />
+      @if (form.controls.password.touched && form.controls.password.invalid) {
+        <small class="field-error">Password must be at least 6 characters.</small>
+      }
+    </div>
+
+    <button type="submit" class="register-btn" [disabled]="isLoading()">
+      {{ isLoading() ? 'Registering...' : 'Register' }}
+    </button>
+
+    <p class="extra-text">
+      Already have an account? <a routerLink="/login">Login</a>
+    </p>
+  </form>
+</div>

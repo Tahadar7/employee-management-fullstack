@@ -68,9 +68,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+    builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularApp", policy =>
+    {
+        policy.WithOrigins("https://localhost:4200")
+              .WithMethods("GET", "POST", "PUT", "DELETE")
+              .WithHeaders("Content-Type", "Authorization")
+              .AllowCredentials();   // needed for the refresh cookie
+    });
+});
+
 var app = builder.Build();
 
-// Global exception handling — must wrap everything below
+// Global exception handling must wrap everything below
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
@@ -85,6 +96,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AngularApp"); // CORS policy for Angular frontend
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
