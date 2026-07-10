@@ -14,7 +14,7 @@ export class EditEmployee implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly employeeService = inject(EmployeeService);
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  public readonly router = inject(Router);
 
   readonly errorMessage = signal<string>('');
   readonly isLoading = signal<boolean>(false);
