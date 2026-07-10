@@ -1,0 +1,58 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h2>Employee Dashboard</h2>
+    <a routerLink="/add-employee" class="add-btn">+ Add Employee</a>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error-banner">{{ errorMessage() }}</div>
+  }
+
+  @if (isLoading()) {
+    <p class="loading">Loading employees...</p>
+  } @else {
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>City</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (employee of employees(); track employee.id) {
+            <tr>
+              <td>{{ employee.name }}</td>
+              <td>{{ employee.email }}</td>
+              <td>{{ employee.phone }}</td>
+              <td>{{ employee.city }}</td>
+              <td>
+                <button class="edit-btn" (click)="editEmployee(employee.id)">Update</button>
+                <button class="delete-btn" (click)="askDelete(employee.id)">Delete</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5">No employees found</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- confirmation dialog: only rendered when an id is pending -->
+@if (pendingDeleteId() !== null) {
+  <app-confirm-dialog
+    title="Delete Employee?"
+    message="This action cannot be undone."
+    confirmText="Delete"
+    cancelText="Cancel"
+    (confirmed)="confirmDelete()"
+    (cancelled)="cancelDelete()"
+  />
+}

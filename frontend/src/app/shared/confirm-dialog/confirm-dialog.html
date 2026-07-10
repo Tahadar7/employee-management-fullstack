@@ -1,0 +1,12 @@
+<div class="dialog-overlay" (click)="onCancel()">
+  <!-- stopPropagation so clicking inside the box doesn't close it -->
+  <div class="dialog-box" (click)="$event.stopPropagation()">
+    <h3 class="dialog-title">{{ title() }}</h3>
+    <p class="dialog-message">{{ message() }}</p>
+
+    <div class="dialog-actions">
+      <button class="dialog-cancel" (click)="onCancel()">{{ cancelText() }}</button>
+      <button class="dialog-confirm" (click)="onConfirm()">{{ confirmText() }}</button>
+    </div>
+  </div>
+</div>
