@@ -1,63 +1,72 @@
-.dashboard { padding: 30px; }
-
-.dashboard-header {
+.form-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    padding: 40px 20px;
+}
+
+.employee-form {
+    background: #0f172a;
+    padding: 30px;
+    border-radius: 10px;
+    width: 350px;
+    color: white;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.employee-form h2 {
+    text-align: center;
     margin-bottom: 20px;
 }
 
-.dashboard-header h2 { font-size: 24px; }
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
 
-.add-btn {
-    background: #22c55e;
-    color: white;
+.form-group label {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.form-group input {
+    padding: 10px;
     border: none;
-    padding: 10px 15px;
+    border-radius: 6px;
+    outline: none;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.submit-btn {
+    flex: 1;
+    background: #22c55e;
+    border: none;
+    padding: 10px;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
+    color: white;
     transition: 0.3s;
-    text-decoration: none;
 }
+.submit-btn:hover { background: #16a34a; }
+.submit-btn:disabled { background: #64748b; cursor: not-allowed; }
 
-.add-btn:hover { background: #16a34a; }
-
-.table-container { overflow-x: auto; }
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #0f172a;
-    color: white;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-th, td { padding: 12px; text-align: left; }
-th { background: #1e293b; }
-tr:nth-child(even) { background: #1a2438; }
-
-.edit-btn {
-    background: #38bdf8;
+.cancel-btn {
+    flex: 1;
+    background: #64748b;
     border: none;
-    padding: 6px 10px;
-    margin-right: 5px;
-    border-radius: 4px;
-    cursor: pointer;
-    color: black;
-}
-.edit-btn:hover { background: #0ea5e9; }
-
-.delete-btn {
-    background: #ef4444;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 4px;
+    padding: 10px;
+    border-radius: 6px;
     cursor: pointer;
     color: white;
 }
-.delete-btn:hover { background: #dc2626; }
+.cancel-btn:hover { background: #475569; }
 
 .error-banner {
     background: #7f1d1d;
@@ -68,12 +77,8 @@ tr:nth-child(even) { background: #1a2438; }
     text-align: center;
 }
 
-.loading { color: #94a3b8; text-align: center; padding: 20px; }
-
-@media (max-width: 768px) {
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
+.field-error {
+    color: #fca5a5;
+    font-size: 12px;
+    margin-top: 4px;
 }

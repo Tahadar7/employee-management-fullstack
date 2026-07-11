@@ -1,6 +1,7 @@
 ﻿using backend.DTOs.Common;
 using backend.Exceptions;
 using FluentValidation;
+using Microsoft.EntityFrameworkCore;      
 using System.Text.Json;
 
 namespace backend.Middleware
@@ -23,10 +24,8 @@ namespace backend.Middleware
 
         private async Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
-            // decide status code + message based on the exception type
             var (statusCode, message, errors) = ex switch
             {
-                // FluentValidation failure -> 400 with field errors
                 ValidationException validationEx => (
                     StatusCodes.Status400BadRequest,
                     "One or more validation errors occurred.",
@@ -38,12 +37,16 @@ namespace backend.Middleware
                         as IDictionary<string, string[]>
                 ),
 
-                // our custom domain exceptions
-                NotFoundException => (StatusCodes.Status404NotFound, ex.Message, null),
-                ConflictException => (StatusCodes.Status409Conflict, ex.Message, null),
-                UnauthorizedException => (StatusCodes.Status401Unauthorized, ex.Message, null),
+                NotFoundException      => (StatusCodes.Status404NotFound,     ex.Message, null),
+                ConflictException      => (StatusCodes.Status409Conflict,     ex.Message, null),
+                UnauthorizedException  => (StatusCodes.Status401Unauthorized, ex.Message, null),
 
-                // anything we didn't anticipate is 500 
+                DbUpdateException dbEx when IsUniqueConstraintViolation(dbEx) => (
+                    StatusCodes.Status409Conflict,
+                    "A record with these details already exists.",
+                    (IDictionary<string, string[]>?)null
+                ),
+
                 _ => (
                     StatusCodes.Status500InternalServerError,
                     "An unexpected error occurred.",
@@ -51,7 +54,6 @@ namespace backend.Middleware
                 )
             };
 
-            // log server errors loudly; log expected ones quietly
             if (statusCode == StatusCodes.Status500InternalServerError)
                 logger.LogError(ex, "Unhandled exception");
             else
@@ -73,6 +75,14 @@ namespace backend.Middleware
             });
 
             await context.Response.WriteAsync(json);
+        }
+
+        // SQL Server unique-constraint
+        private static bool IsUniqueConstraintViolation(DbUpdateException ex)
+        {
+            return ex.InnerException?.Message.Contains("duplicate key") == true
+                || ex.InnerException?.Message.Contains("2601") == true
+                || ex.InnerException?.Message.Contains("2627") == true;
         }
     }
 }

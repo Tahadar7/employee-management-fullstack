@@ -15,7 +15,7 @@ namespace backend.Controllers
         {
             var result = await authService.RegisterAsync(request, ct);
             SetRefreshTokenCookie(result.RefreshToken);
-            return Ok(result);
+            return Ok(result.Response);
         }
 
         [HttpPost("login")]
@@ -23,7 +23,7 @@ namespace backend.Controllers
         {
             var result = await authService.LoginAsync(request, ct);
             SetRefreshTokenCookie(result.RefreshToken);
-            return Ok(result);
+            return Ok(result.Response);
         }
 
         [HttpPost("refresh")]
@@ -34,7 +34,7 @@ namespace backend.Controllers
 
             var result = await authService.RefreshAsync(refreshToken, ct);
             SetRefreshTokenCookie(result.RefreshToken);  // rotate: set the new one
-            return Ok(result);
+            return Ok(result.Response);
         }
 
          [HttpPost("logout")]

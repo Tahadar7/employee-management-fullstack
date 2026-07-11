@@ -81,6 +81,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await DbSeeder.SeedAdminAsync(context);
+}
+
 // Global exception handling must wrap everything below
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

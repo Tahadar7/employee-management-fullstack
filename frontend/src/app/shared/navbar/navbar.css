@@ -59,3 +59,13 @@
     .nav-links.active { display: flex; }
     .menu-toggle { display: block; }
 }
+
+.role-badge {
+    background: #1e293b;
+    color: #38bdf8;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    list-style: none;
+}

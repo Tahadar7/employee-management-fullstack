@@ -77,3 +77,39 @@ tr:nth-child(even) { background: #1a2438; }
         gap: 10px;
     }
 }
+
+/* disabled state for restricted buttons */
+.edit-btn:disabled,
+.delete-btn:disabled,
+.disabled-btn {
+    background: #64748b !important;
+    color: #cbd5e1 !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.edit-btn:disabled:hover,
+.delete-btn:disabled:hover,
+.disabled-btn:hover {
+    background: #64748b !important;
+}
+
+/* the Add button as a disabled <button> needs the same shape as the <a> */
+.disabled-btn {
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* view-only notice */
+.info-banner {
+    background: #1e3a5f;
+    color: #bfdbfe;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 14px;
+}

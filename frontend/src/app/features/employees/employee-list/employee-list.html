@@ -1,8 +1,25 @@
 <div class="dashboard">
   <div class="dashboard-header">
     <h2>Employee Dashboard</h2>
-    <a routerLink="/add-employee" class="add-btn">+ Add Employee</a>
+
+    @if (isAdmin()) {
+      <a routerLink="/add-employee" class="add-btn">+ Add Employee</a>
+    } @else {
+      <button
+        class="add-btn disabled-btn"
+        disabled
+        title="Only admins can perform this action">
+        + Add Employee
+      </button>
+    }
   </div>
+
+  <!-- view-only notice for non-admins -->
+  @if (!isAdmin()) {
+    <div class="info-banner">
+      You have view-only access. Only admins can add, edit, or delete employees.
+    </div>
+  }
 
   @if (errorMessage()) {
     <div class="error-banner">{{ errorMessage() }}</div>
@@ -30,8 +47,21 @@
               <td>{{ employee.phone }}</td>
               <td>{{ employee.city }}</td>
               <td>
-                <button class="edit-btn" (click)="editEmployee(employee.id)">Update</button>
-                <button class="delete-btn" (click)="askDelete(employee.id)">Delete</button>
+                <button
+                  class="edit-btn"
+                  [disabled]="!isAdmin()"
+                  [title]="!isAdmin() ? 'Only admins can perform this action' : ''"
+                  (click)="editEmployee(employee.id)">
+                  Update
+                </button>
+
+                <button
+                  class="delete-btn"
+                  [disabled]="!isAdmin()"
+                  [title]="!isAdmin() ? 'Only admins can perform this action' : ''"
+                  (click)="askDelete(employee.id)">
+                  Delete
+                </button>
               </td>
             </tr>
           } @empty {
@@ -45,7 +75,6 @@
   }
 </div>
 
-<!-- confirmation dialog: only rendered when an id is pending -->
 @if (pendingDeleteId() !== null) {
   <app-confirm-dialog
     title="Delete Employee?"

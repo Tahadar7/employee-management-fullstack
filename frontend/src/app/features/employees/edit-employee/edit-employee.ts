@@ -24,7 +24,7 @@ export class EditEmployee implements OnInit {
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
     email: ['', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
-    phone: [''],
+    phone: ['', [Validators.pattern(/^\d{11}$/)]],
     city: [''],
   });
 

@@ -27,7 +27,8 @@ namespace backend.Controllers
 
             return Ok(employee);
         }
-
+        
+        [Authorize(Roles = "Admin")]  // only Admin can create new employees
         [HttpPost]
         public async Task<ActionResult<EmployeeResponse>> Create(CreateEmployeeRequest request, CancellationToken ct)
         {
@@ -37,6 +38,7 @@ namespace backend.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
+        [Authorize(Roles = "Admin")]  // only Admin can update employees
         [HttpPut("{id:int}")]
         public async Task<ActionResult<EmployeeResponse>> Update(int id, UpdateEmployeeRequest request, CancellationToken ct)
         {
@@ -48,6 +50,7 @@ namespace backend.Controllers
             return Ok(updated);
         }
 
+        [Authorize(Roles = "Admin")]  // only Admin can delete employees
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id, CancellationToken ct)
         {

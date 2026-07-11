@@ -1,13 +1,14 @@
 ﻿using backend.Data;
 using backend.DTOs.Employee;
 using backend.Entities;
-using backend.Services.Interfaces;
+using backend.Exceptions;                    
+using backend.Services.Interfaces;  
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services.Implementations
 {
-    public class EmployeeService(ApplicationDbContext context, 
+    public class EmployeeService(ApplicationDbContext context,
         IValidator<CreateEmployeeRequest> createValidator,
         IValidator<UpdateEmployeeRequest> updateValidator) : IEmployeeService
     {
@@ -39,19 +40,28 @@ namespace backend.Services.Implementations
         public async Task<EmployeeResponse> CreateAsync(CreateEmployeeRequest request, CancellationToken ct = default)
         {
             await createValidator.ValidateAndThrowAsync(request, ct);
-
+        
             var emailExists = await context.Employees
                 .AnyAsync(e => e.Email == request.Email, ct);
-
             if (emailExists)
-                throw new InvalidOperationException("Employee with this email already exists.");
+                throw new ConflictException("Employee with this email already exists.");
+
+            // unique phone (only when provided)
+            var normalizedPhone = Normalize(request.Phone);
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+            {
+                var phoneExists = await context.Employees
+                    .AnyAsync(e => e.Phone == normalizedPhone, ct);
+                if (phoneExists)
+                    throw new ConflictException("Employee with this phone number already exists.");
+            }
 
             var employee = new Employee
             {
                 Name = request.Name,
                 Email = request.Email,
-                Phone = request.Phone,
-                City = request.City
+                Phone = Normalize(request.Phone),
+                City = Normalize(request.City)
             };
 
             context.Employees.Add(employee);
@@ -68,10 +78,26 @@ namespace backend.Services.Implementations
             if (employee is null)
                 return null;
 
+            // unique email exclude self
+            var emailTaken = await context.Employees
+                .AnyAsync(e => e.Email == request.Email && e.Id != id, ct);
+            if (emailTaken)
+                throw new ConflictException("Employee with this email already exists.");
+
+            // unique phone exclude self
+            var normalizedPhone = Normalize(request.Phone);
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+            {
+                var phoneTaken = await context.Employees
+                    .AnyAsync(e => e.Phone == normalizedPhone && e.Id != id, ct);
+                if (phoneTaken)
+                    throw new ConflictException("Employee with this phone number already exists.");
+            }
+
             employee.Name = request.Name;
             employee.Email = request.Email;
-            employee.Phone = request.Phone;
-            employee.City = request.City;
+            employee.Phone = Normalize(request.Phone);
+            employee.City = Normalize(request.City);
             employee.UpdatedAt = DateTime.UtcNow;
 
             await context.SaveChangesAsync(ct);
@@ -98,5 +124,9 @@ namespace backend.Services.Implementations
             Phone = e.Phone,
             City = e.City
         };
+
+        private static string? Normalize(string? value) {
+            return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        }
     }
 }

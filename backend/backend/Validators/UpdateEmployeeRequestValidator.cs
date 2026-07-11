@@ -13,8 +13,10 @@ namespace backend.Validators
             RuleFor(x => x.Email)
                 .NotEmpty().EmailAddress().MaximumLength(150);
 
-            RuleFor(x => x.Phone).MaximumLength(20);
-            RuleFor(x => x.City).MaximumLength(100);
+            RuleFor(x => x.Phone)
+    .Matches(@"^\d{11}$")
+    .WithMessage("Phone must be exactly 11 digits.")
+    .When(x => !string.IsNullOrWhiteSpace(x.Phone));
         }
     }
 }

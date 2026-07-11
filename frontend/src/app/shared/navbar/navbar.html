@@ -1,16 +1,21 @@
 <nav class="navbar">
   <div class="logo">EmployeeApp</div>
 
-  <ul class="nav-links" [class.active]="menuOpen()">
-    @if (isAuthenticated()) {
-      <li><a routerLink="/dashboard" routerLinkActive="active-link" (click)="closeMenu()">Dashboard</a></li>
+ <ul class="nav-links" [class.active]="menuOpen()">
+  @if (isAuthenticated()) {
+    <li><a routerLink="/dashboard" routerLinkActive="active-link" (click)="closeMenu()">Dashboard</a></li>
+
+    @if (isAdmin()) {
       <li><a routerLink="/add-employee" routerLinkActive="active-link" (click)="closeMenu()">Add Employee</a></li>
-      <li><button class="logout-btn" (click)="askLogout()">Logout</button></li>
-    } @else {
-      <li><a routerLink="/login" routerLinkActive="active-link" (click)="closeMenu()">Login</a></li>
-      <li><a routerLink="/register" routerLinkActive="active-link" (click)="closeMenu()">Register</a></li>
     }
-  </ul>
+
+    <li class="role-badge">{{ role() }}</li>
+    <li><button class="logout-btn" (click)="askLogout()">Logout</button></li>
+  } @else {
+    <li><a routerLink="/login" routerLinkActive="active-link" (click)="closeMenu()">Login</a></li>
+    <li><a routerLink="/register" routerLinkActive="active-link" (click)="closeMenu()">Register</a></li>
+  }
+</ul>
 
   <div class="menu-toggle" (click)="toggleMenu()">☰</div>
 </nav>

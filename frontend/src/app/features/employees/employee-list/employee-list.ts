@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { EmployeeService } from '../../../core/services/employee.service';
+import { AuthService } from '../../../core/services/auth.service';   
 import { Employee } from '../../../core/models/employee/employee.model';
 import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 
@@ -13,13 +14,14 @@ import { ConfirmDialog } from '../../../shared/confirm-dialog/confirm-dialog';
 })
 export class EmployeeList implements OnInit {
   private readonly employeeService = inject(EmployeeService);
+  private readonly authService = inject(AuthService);      
   private readonly router = inject(Router);
+
+  readonly isAdmin = this.authService.isAdmin;           
 
   readonly employees = signal<Employee[]>([]);
   readonly isLoading = signal<boolean>(false);
   readonly errorMessage = signal<string>('');
-
-  // holds the id of the employee pending deletion (null = dialog hidden)
   readonly pendingDeleteId = signal<number | null>(null);
 
   ngOnInit(): void {
@@ -45,17 +47,14 @@ export class EmployeeList implements OnInit {
     this.router.navigate(['/edit-employee', id]);
   }
 
-  // open the dialog
   askDelete(id: number): void {
     this.pendingDeleteId.set(id);
   }
 
-  // dialog cancelled
   cancelDelete(): void {
     this.pendingDeleteId.set(null);
   }
 
-  // dialog confirmed
   confirmDelete(): void {
     const id = this.pendingDeleteId();
     if (id === null) return;

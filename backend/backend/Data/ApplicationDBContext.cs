@@ -29,6 +29,10 @@ namespace backend.Data
             modelBuilder.Entity<Employee>(entity =>
             {
                 entity.HasIndex(e => e.Email).IsUnique();
+
+                entity.HasIndex(e => e.Phone)
+          .IsUnique()
+          .HasFilter("[Phone] IS NOT NULL");    // allow multiple nulls, but unique if not null
             });
 
             // ---- RefreshToken ----

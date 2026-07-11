@@ -14,6 +14,8 @@ export class Navbar {
   private readonly router = inject(Router);
 
   readonly isAuthenticated = this.authService.isAuthenticated;
+  readonly isAdmin = this.authService.isAdmin;
+  readonly role = this.authService.role;
 
   readonly menuOpen = signal<boolean>(false);
   readonly showLogoutConfirm = signal<boolean>(false);
